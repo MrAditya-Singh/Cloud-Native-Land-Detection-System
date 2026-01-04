@@ -1,0 +1,54 @@
+# Data Ingestion Configuration
+data_ingestion:
+  # Phase 1: Free & Reliable Sources
+  phase1:
+    sentinel2:
+      enabled: true
+      resolution: "10m"
+      type: "multispectral"
+      max_cloud_coverage: 20
+      download_path: "data/sentinel2"
+    
+    landsat:
+      enabled: true
+      missions: ["landsat-8", "landsat-9"]
+      type: "historical"
+      max_cloud_coverage: 20
+      download_path: "data/landsat"
+  
+  # Phase 2: Paid Clients
+  phase2:
+    commercial_providers:
+      enabled: false
+      providers:
+        - name: "planet"
+          api_key_env: "PLANET_API_KEY"
+          enabled: false
+        - name: "maxar"
+          api_key_env: "MAXAR_API_KEY"
+          enabled: false
+    
+    on_demand:
+      enabled: false
+      high_resolution: true
+      request_queue: "data/requests"
+
+# AWS Integration
+aws:
+  s3:
+    enabled: true
+    bucket_name: "land-detection-satellite-data"
+    region: "us-east-1"
+    aoi_based_storage: true
+    storage_structure: "s3://{bucket}/{aoi_id}/{source}/{date}/"
+  
+  automation:
+    method: "cron"  # Options: "cron" or "eventbridge"
+    schedule: "0 2 * * *"  # Daily at 2 AM
+    eventbridge_rule: "land-detection-ingestion"
+
+# AOI (Area of Interest) Configuration
+aoi:
+  default_buffer_km: 5
+  coordinate_system: "EPSG:4326"
+  max_aoi_size_km2: 10000
